@@ -28,10 +28,12 @@ def _get_pagecount(html):
             break
     return base, int(nums)
 
+
 def get_topics(html):
     return [(e.get('href'), e.text)
             for e in html.iter('a')
             if e.get('class', '') == 'topictitle']
+
 
 class Carookee(Session):
     """requests Session class extended by login and dump
@@ -49,7 +51,6 @@ class Carookee(Session):
         Session.__init__(self, *args, **kwargs)
         self.forum = forum
 
-
     def get_html(self, url):
         """get the url and parse it with lxml.html
            returns: lxml.html Elementtree"""
@@ -58,9 +59,8 @@ class Carookee(Session):
         html.make_links_absolute(self.DOMAIN)
         return html
 
-
     def login(self, username, password):
-        html = self.get_html ("%s/forum/%s/login" % (self.DOMAIN, self.forum))
+        html = self.get_html("%s/forum/%s/login" % (self.DOMAIN, self.forum))
         vals = {}
         for elem in html.iter('input'):
             vals[elem.name] = elem.value
@@ -70,7 +70,6 @@ class Carookee(Session):
         res = self.post(action, vals)
         return res.ok
 
-
     def list_subforums(self):
         html = self.get_html("%s/forum/%s" % (self.DOMAIN, self.forum))
         subf = []
@@ -79,9 +78,7 @@ class Carookee(Session):
                 subf.append((elem.get('href'), elem.text))
         return subf
 
-
     def list_topics(self, sflink):
-
 
         html = self.get_html(sflink)
         topics = []
@@ -89,11 +86,10 @@ class Carookee(Session):
 
         # look for more then on page of topics
         base, nums = _get_pagecount(html)
-        for i in range (2, nums + 1):
-            html = self.get_html("%s%i" %(base, i))
+        for i in range(2, nums + 1):
+            html = self.get_html("%s%i" % (base, i))
             topics.extend(get_topics(html))
         return topics
-
 
     def get_topic(self, tplink):
         html = self.get_html(tplink)
@@ -102,8 +98,8 @@ class Carookee(Session):
         pages.append(html)
 
         base, nums = _get_pagecount(html)
-        for i in range (2, nums + 1):
-            pages.append(self.get_html("%s%i" %(base, i)))
+        for i in range(2, nums + 1):
+            pages.append(self.get_html("%s%i" % (base, i)))
 
         for page in pages:
             # find table with the content
@@ -115,7 +111,7 @@ class Carookee(Session):
 
                 try:
                     detail = row.find(".//span[@class='postdetails'][1]"
-                            ).text_content()
+                                      ).text_content()
                     date, subject = self.RXP_DATE.search(detail).groups()
 
                 except:
@@ -124,16 +120,17 @@ class Carookee(Session):
 
                 try:
                     content = row.find(".//span[@class='postbody']"
-                            ).text_content()
+                                       ).text_content()
                 except:
                     content = ""
 
                 if content:
-                    posts.append({
-                        'author': author,
-                        'date': date,
-                        'subject': subject,
-                        'content': content,
+                    posts.append(
+                        {
+                            'author': author,
+                            'date': date,
+                            'subject': subject,
+                            'content': content,
                         })
         return posts
 
@@ -155,10 +152,11 @@ if __name__ == '__main__':
         topics = c.list_topics(link)
         for link, tname in topics:
             t = c.get_topic(link)
-            json.dump({
-                'Forum': fname,
-                'Topic': tname,
-                'Thread': t,
+            json.dump(
+                {
+                    'Forum': fname,
+                    'Topic': tname,
+                    'Thread': t,
                 }, sys.stdout, indent=4)
             print ","
     print "{}]"
