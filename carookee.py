@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     print "["
 
-    for link, fname in sforums[:2]:
+    for link, fname in sforums:
         topics = c.list_topics(link)
         for link, tname in topics:
             t = c.get_topic(link)
